@@ -1,33 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/users_single_image"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginLeft="15dp"
+        android:layout_marginTop="15dp"
         android:layout_marginRight="15dp"
         android:layout_marginBottom="15dp"
-        android:layout_marginTop="15dp"
-        android:src="@drawable/defaultimg"
-        android:id="@+id/users_single_image"/>
+        android:src="@drawable/defaultimg" />
+
     <TextView
+        android:id="@+id/users_single_name"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
-        android:text="Display Name"
-        android:textSize="18dp"
         android:layout_marginStart="85dp"
         android:layout_marginTop="15dp"
-        android:id="@+id/users_single_name"/>
+        android:text="Display Name"
+        android:textColor="@android:color/black"
+        android:textSize="18dp" />
 
     <TextView
+        android:id="@+id/users_single_status"
         android:layout_width="100dp"
-        android:layout_height="wrap_content"
 
-        android:text="Status"
-        android:textSize="12dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="85dp"
         android:layout_marginTop="36dp"
-        android:id="@+id/users_single_status"/>
+        android:text="Status"
+        android:textSize="12dp" />
 </RelativeLayout>
