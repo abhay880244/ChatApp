@@ -21,6 +21,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.squareup.picasso.Picasso;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class AllUsersActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
@@ -57,6 +59,7 @@ public class AllUsersActivity extends AppCompatActivity {
                 .getReference()
                 .child("Users");
 
+        //to store every user's name,image,status into model class->Users
         FirebaseRecyclerOptions<Users> options =
                 new FirebaseRecyclerOptions.Builder<Users>()
                         .setQuery(query, new SnapshotParser<Users>() {
@@ -65,7 +68,8 @@ public class AllUsersActivity extends AppCompatActivity {
                             public Users parseSnapshot(@NonNull DataSnapshot snapshot) {
                                 return new Users(snapshot.child("name").getValue().toString(),
                                         snapshot.child("image").getValue().toString(),
-                                        snapshot.child("status").getValue().toString());
+                                        snapshot.child("status").getValue().toString(),
+                                        snapshot.child("thumb_img").getValue().toString());
                             }
                         })
                         .build();
@@ -83,31 +87,37 @@ public class AllUsersActivity extends AppCompatActivity {
 
             @Override
             protected void onBindViewHolder(UsersViewHolder holder, final int position, Users users) {
+                //setting user's name,Image,status to users_single_layout
                 holder.setName(users.getName());
-                holder.setImage(users.getImage());
+                holder.setImage(users.getThumb_img());
                 holder.setStatus(users.getStatus());
 
             }
 
         };
-        adapter.startListening();
+
+        //setting all user's data to recyclerview
         mUsersList.setAdapter(adapter);
+        adapter.startListening();
     }
 
     public static class UsersViewHolder extends RecyclerView.ViewHolder{
+
 
         View mView;
         public UsersViewHolder(@NonNull View itemView) {
             super(itemView);
             mView=itemView;
         }
+
+        //methods for setting values in textviews in users_single_layout
         public void setName(String name){
             TextView mUserNameView=mView.findViewById(R.id.users_single_name);
             mUserNameView.setText(name);
         }
         public void setImage(String image){
-            ImageView mUserImageView=mView.findViewById(R.id.users_single_image);
-            Picasso.get().load(image).into(mUserImageView);
+            CircleImageView mUserImageView=mView.findViewById(R.id.users_single_image);
+            Picasso.get().load(image).placeholder(R.drawable.defaultimg).into(mUserImageView);
         }
         public void setStatus(String status){
             TextView mUserStatusView=mView.findViewById(R.id.users_single_status);
