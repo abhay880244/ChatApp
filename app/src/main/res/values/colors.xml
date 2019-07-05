@@ -3,4 +3,5 @@
     <color name="colorPrimary">#9C27B0</color>
     <color name="colorPrimaryDark">#9C27B0</color>
     <color name="colorAccent">#F2FF1736</color>
+    <color name="DAGreyColor">#BF181515</color>
 </resources>

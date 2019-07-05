@@ -1,5 +1,6 @@
 package com.abhay.chatapp;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -91,6 +92,19 @@ public class AllUsersActivity extends AppCompatActivity {
                 holder.setName(users.getName());
                 holder.setImage(users.getThumb_img());
                 holder.setStatus(users.getStatus());
+
+                //getting userid by position in users list recyclerciew
+                final String user_id=getRef(position).getKey();
+                //mView is user_single_layout
+                holder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        Intent profileIntent =new Intent(AllUsersActivity.this,ProfileActivity.class);
+                        profileIntent.putExtra("user_id",user_id);
+                        startActivity(profileIntent);
+                    }
+                });
 
             }
 
