@@ -8,12 +8,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.abhay.chatapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
@@ -21,6 +23,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.HashMap;
 
@@ -52,10 +56,10 @@ public class RegisterActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Create Account");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mDisplayName=(TextInputLayout) findViewById(R.id.reg_display_name);
-        mEmail=(TextInputLayout)findViewById(R.id.login_email);
-        mPassword=(TextInputLayout)findViewById(R.id.login_password);
-        mCreateBtn=(Button) findViewById(R.id.reg_create_button);
+        mDisplayName= findViewById(R.id.reg_display_name);
+        mEmail=findViewById(R.id.login_email);
+        mPassword=findViewById(R.id.login_password);
+        mCreateBtn= findViewById(R.id.reg_create_button);
 
         mRegProgress=new ProgressDialog(this);
 
@@ -110,11 +114,35 @@ public class RegisterActivity extends AppCompatActivity {
                                 }
                             });
 
+                            //code for storing device token id to users database
+                            FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                    if(!task.isSuccessful()){
+                                        Log.w("hg", "getInstanceId failed", task.getException());
+                                        return;
+                                    }
+                                    // Get new Instance ID token
+                                    String deviceToken = task.getResult().getToken();
+
+                                    mDataBaseReference.child("deviceToken").setValue(deviceToken).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            mRegProgress.dismiss();
+
+                                        }
+                                    });
+
+
+                                }
+                            });
+
 
 
                         } else {
 
                             mRegProgress.hide();
+                            Log.d("err", "onComplete() returned: " + task.getException());
                             Toast.makeText(RegisterActivity.this, "Can't Sign in Please Check Your Credentials!", Toast.LENGTH_SHORT).show();
                         }
 

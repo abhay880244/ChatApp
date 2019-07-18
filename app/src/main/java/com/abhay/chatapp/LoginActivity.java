@@ -15,10 +15,15 @@ import android.widget.Toast;
 
 import com.abhay.chatapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -26,6 +31,8 @@ public class LoginActivity extends AppCompatActivity {
     private Toolbar mToolBar;
 
     private TextInputLayout mLoginEmail,mLoginPassword;
+
+    private DatabaseReference mUsersDatabse;
 
     private Button mLogin_btn;
 
@@ -43,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
 
         mLoginProgress=new ProgressDialog(this);
 
+        mUsersDatabse= FirebaseDatabase.getInstance().getReference().child("Users");
 
         mLoginEmail=(TextInputLayout)findViewById(R.id.login_email);
         mLoginPassword=(TextInputLayout)findViewById(R.id.login_password);
@@ -80,11 +88,34 @@ public class LoginActivity extends AppCompatActivity {
 
                 if(task.isSuccessful()){
 
-                    mLoginProgress.dismiss();
-                    Intent mainIntent=new Intent(LoginActivity.this,MainActivity.class);
-                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |Intent.FLAG_ACTIVITY_CLEAR_TASK);//it prevents us go back to the StartActivity without this we go back to StartActivity
-                    startActivity(mainIntent);
-                    finish();//prevents us to go back to LoginActivity
+                    FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                            if(!task.isSuccessful()){
+                                Log.w("hg", "getInstanceId failed", task.getException());
+                                return;
+                            }
+
+                            String current_userId=FirebaseAuth.getInstance().getUid();
+                            // Get new Instance ID token
+                            String deviceToken = task.getResult().getToken();
+
+                            mUsersDatabse.child(current_userId).child("deviceToken").setValue(deviceToken).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    mLoginProgress.dismiss();
+                                    Intent mainIntent=new Intent(LoginActivity.this,MainActivity.class);
+                                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |Intent.FLAG_ACTIVITY_CLEAR_TASK);//it prevents us go back to the StartActivity without this we go back to StartActivity
+                                    startActivity(mainIntent);
+                                    finish();//prevents us to go back to LoginActivity
+                                }
+                            });
+
+
+                        }
+                    });
+
+
                 }
                 else{
 
