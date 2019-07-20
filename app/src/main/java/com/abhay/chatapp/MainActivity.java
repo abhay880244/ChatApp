@@ -18,6 +18,8 @@ import android.view.MenuItem;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private SectionsPagerAdapter mSectiosPagerAdapter;
     private TabLayout mTabLayout;
+    private DatabaseReference mUserDatabase;
 
 
 
@@ -47,6 +50,13 @@ public class MainActivity extends AppCompatActivity {
         mToolBar=findViewById(R.id.main_page_toolbar);
         setSupportActionBar(mToolBar);
         getSupportActionBar().setTitle("ChatApp");
+
+        if (mAuth.getCurrentUser() != null) {
+            String current_uid = mAuth.getCurrentUser().getUid();
+
+            mUserDatabase = FirebaseDatabase.getInstance().getReference().child("Users")
+                    .child(current_uid);
+        }
 
         //tabs
         mViewPager=findViewById(R.id.main_tab_pager);
@@ -79,7 +89,18 @@ public class MainActivity extends AppCompatActivity {
         if(currentUser==null){//if user not logged in then we have to create an account by sending us to start activity
             sendToStart();
         }
+        else {
+            mUserDatabase.child("online").setValue(true);
+        }
 
+
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mUserDatabase.child("online").setValue(false);
 
     }
 

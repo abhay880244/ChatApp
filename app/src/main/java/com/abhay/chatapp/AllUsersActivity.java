@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.SnapshotParser;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -28,7 +30,8 @@ public class AllUsersActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private RecyclerView mUsersList;
-
+    private FirebaseAuth mAuth;
+    private DatabaseReference mUsersDatabase;
 
 
     @Override
@@ -39,6 +42,8 @@ public class AllUsersActivity extends AppCompatActivity {
         mToolbar=findViewById(R.id.allusersAppBar);
         mUsersList=findViewById(R.id.users_list);
 
+        mAuth=FirebaseAuth.getInstance();
+        mUsersDatabase=FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid());
 
 
         setSupportActionBar(mToolbar);
@@ -52,6 +57,8 @@ public class AllUsersActivity extends AppCompatActivity {
 
 
     }
+
+
 
     @Override
     protected void onStart() {
@@ -113,6 +120,19 @@ public class AllUsersActivity extends AppCompatActivity {
         //setting all user's data to recyclerview
         mUsersList.setAdapter(adapter);
         adapter.startListening();
+
+
+            mUsersDatabase.child("online").setValue(true);
+
+        Log.i("onStart", "onStart ");
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mUsersDatabase.child("online").setValue(false);
     }
 
     public static class UsersViewHolder extends RecyclerView.ViewHolder{

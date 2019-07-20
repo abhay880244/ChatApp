@@ -28,28 +28,33 @@ public class StatusActivity extends AppCompatActivity {
 
     //FireBase
     private DatabaseReference mStatusdatabase;
+    private DatabaseReference mUsersDatabase;
     private FirebaseUser mCurrentUser;
 
     //Progress
     ProgressDialog mProgress;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_status);
 
-        mStatusInput=findViewById(R.id.status_input);
-        mSaveChangesBtn=findViewById(R.id.status_save_btn);
+        mStatusInput = findViewById(R.id.status_input);
+        mSaveChangesBtn = findViewById(R.id.status_save_btn);
 
-        String status_value=getIntent().getStringExtra("status_value");
+        String status_value = getIntent().getStringExtra("status_value");
         mStatusInput.getEditText().setText(status_value);
 
         //FireBase
-        mCurrentUser=FirebaseAuth.getInstance().getCurrentUser();
-        String CurrentUID=mCurrentUser.getUid();
-        mStatusdatabase= FirebaseDatabase.getInstance().getReference().child("Users").child(CurrentUID);
+        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String CurrentUID = mCurrentUser.getUid();
+        mStatusdatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(CurrentUID);
 
-        mToolbar=findViewById(R.id.status_appbar);
+        mAuth=FirebaseAuth.getInstance();
+        mUsersDatabase=FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid());
+
+        mToolbar = findViewById(R.id.status_appbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("Account Status");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -59,24 +64,40 @@ public class StatusActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 //Progress
-                mProgress=new ProgressDialog(StatusActivity.this);
+                mProgress = new ProgressDialog(StatusActivity.this);
                 mProgress.setTitle("Saving Changes");
                 mProgress.setMessage("Please wait while we save the changes");
                 mProgress.show();
 
-                String Status=mStatusInput.getEditText().getText().toString();
+                String Status = mStatusInput.getEditText().getText().toString();
 
                 mStatusdatabase.child("status").setValue(Status).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             mProgress.dismiss();
-                        }else {
+                        } else {
                             Toast.makeText(StatusActivity.this, "There is some error occured while saving changes", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+
+            mUsersDatabase.child("online").setValue(true);
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mUsersDatabase.child("online").setValue(false);
     }
 }

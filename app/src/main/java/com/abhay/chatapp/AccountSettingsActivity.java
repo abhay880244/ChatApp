@@ -55,10 +55,12 @@ public class AccountSettingsActivity extends AppCompatActivity {
     private Button mChangeImagebtn;
     private static final int GALLERY_PICK = 1;
 
+
     private ProgressDialog mProgress;
 
     //storage firebase for profile images
     private StorageReference mImageStorage;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,12 +76,14 @@ public class AccountSettingsActivity extends AppCompatActivity {
         mImageStorage = FirebaseStorage.getInstance().getReference();//pointing to root of cloud storage
 
 
-        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mAuth = FirebaseAuth.getInstance();
+        mCurrentUser = mAuth.getCurrentUser();
         String current_uid = mCurrentUser.getUid();
 
         //mUserDatabase currently pointing to current userid
         mUserDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(current_uid);
         mUserDatabase.keepSynced(true);
+
 
         //get values of user details to show on account settings activity
         mUserDatabase.addValueEventListener(new ValueEventListener() {
@@ -96,7 +100,7 @@ public class AccountSettingsActivity extends AppCompatActivity {
                 mStatus.setText(status);
 
 
-                if(!image.equals("default")) {
+                if (!image.equals("default")) {
                     //Picasso.get().load(image).placeholder(R.drawable.defaultimg).into(mDisplayImage);
                     Picasso.get().load(image).networkPolicy(NetworkPolicy.OFFLINE)
                             .placeholder(R.drawable.defaultimg).into(mDisplayImage, new Callback() {
@@ -120,6 +124,7 @@ public class AccountSettingsActivity extends AppCompatActivity {
 
             }
         });
+
 
         mChangeStatusbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,6 +151,26 @@ public class AccountSettingsActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mUserDatabase.child("online").setValue(true);
+        Log.i("onStart", "onStart ");
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mUserDatabase.child("online").setValue(false);
+
+    }
+
+
+
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -176,7 +201,7 @@ public class AccountSettingsActivity extends AppCompatActivity {
                 Uri resultUri = result.getUri();//uri of cropped image
 
                 //converting uri of cropped image into file
-                File thumb_file=new File(resultUri.getPath());
+                File thumb_file = new File(resultUri.getPath());
 
                 final String current_user_id = mCurrentUser.getUid();//current user id
 
@@ -194,86 +219,82 @@ public class AccountSettingsActivity extends AppCompatActivity {
                     final byte[] thumb_byte = baos.toByteArray();
 
 
+                    //creating file path, this is where we are going to store the file and naming the image file we are storing on cloud storage.
+                    StorageReference file_path = mImageStorage.child("profile_images").child(current_user_id + ".jpg");
+
+                    //creating thumbnail file path, this is where we are going to store the thumb file and naming the thumb image file we are storing on cloud storage.
+                    final StorageReference thumb_file_path = mImageStorage.child("profile_images").child("thumbs").child(current_user_id + ".jpg");
+
+                    //storing cropped image on file path inside cloud storage
+                    file_path.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+
+                            if (task.isSuccessful()) {
 
 
+                                // String download_url=task.getResult().toString();
+                                //get image url from cloud storage i.e, pointing to current user's image in profile_images folder
+                                mImageStorage.child("profile_images").child(current_user_id + ".jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
 
-                //creating file path, this is where we are going to store the file and naming the image file we are storing on cloud storage.
-                StorageReference file_path = mImageStorage.child("profile_images").child(current_user_id + ".jpg");
+                                    @Override
+                                    public void onSuccess(Uri uri) {
 
-                //creating thumbnail file path, this is where we are going to store the thumb file and naming the thumb image file we are storing on cloud storage.
-                final StorageReference thumb_file_path = mImageStorage.child("profile_images").child("thumbs").child(current_user_id + ".jpg");
+                                        final String image_download_url = uri.toString();//converting image url in string
 
-                //storing cropped image on file path inside cloud storage
-                file_path.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                        //uploading thumbnail to thumb_file_path
+                                        UploadTask uploadTask = thumb_file_path.putBytes(thumb_byte);
 
-                        if (task.isSuccessful()) {
+                                        //storing thumbnail on thumb_file_path inside cloud storage
+                                        uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull final Task<UploadTask.TaskSnapshot> thumb_task) {
 
+                                                //get thumb image url from cloud storage i.e, pointing to current user's thumb image in thumbs folder within profile_images folder
+                                                mImageStorage.child("profile_images").child("thumbs").child(current_user_id + ".jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
 
-                           // String download_url=task.getResult().toString();
-                            //get image url from cloud storage i.e, pointing to current user's image in profile_images folder
-                            mImageStorage.child("profile_images").child(current_user_id + ".jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-
-                                @Override
-                                public void onSuccess(Uri uri) {
-
-                                    final String image_download_url = uri.toString();//converting image url in string
-
-                                    //uploading thumbnail to thumb_file_path
-                                    UploadTask uploadTask = thumb_file_path.putBytes(thumb_byte);
-
-                                    //storing thumbnail on thumb_file_path inside cloud storage
-                                    uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull final Task<UploadTask.TaskSnapshot> thumb_task) {
-
-                                            //get thumb image url from cloud storage i.e, pointing to current user's thumb image in thumbs folder within profile_images folder
-                                            mImageStorage.child("profile_images").child("thumbs").child(current_user_id + ".jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-
-                                                @Override
-                                                public void onSuccess(Uri uri) {
-                                                    String thumb_download_url = uri.toString();//converting thumb image url in string
-
-
-                                            if(thumb_task.isSuccessful()){
-
-
-                                                Map update_hashMap=new HashMap<>();
-                                                update_hashMap.put("image",image_download_url);
-                                                update_hashMap.put("thumb_img",thumb_download_url);
-                                                //storing image url and thumb url into database previously mUserDatabase pointing to current uid written on line 70,71
-                                                mUserDatabase.updateChildren(update_hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        mProgress.dismiss();
-                                                        Toast.makeText(AccountSettingsActivity.this, "Uploading Success", Toast.LENGTH_LONG).show();
+                                                    public void onSuccess(Uri uri) {
+                                                        String thumb_download_url = uri.toString();//converting thumb image url in string
+
+
+                                                        if (thumb_task.isSuccessful()) {
+
+
+                                                            Map update_hashMap = new HashMap<>();
+                                                            update_hashMap.put("image", image_download_url);
+                                                            update_hashMap.put("thumb_img", thumb_download_url);
+                                                            //storing image url and thumb url into database previously mUserDatabase pointing to current uid written on line 70,71
+                                                            mUserDatabase.updateChildren(update_hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    mProgress.dismiss();
+                                                                    Toast.makeText(AccountSettingsActivity.this, "Uploading Success", Toast.LENGTH_LONG).show();
+                                                                }
+                                                            });
+
+
+                                                        } else {
+
+                                                            Toast.makeText(AccountSettingsActivity.this, "Error in uploading thumbnail", Toast.LENGTH_LONG).show();
+                                                            mProgress.dismiss();
+                                                        }
+
                                                     }
                                                 });
-
-
                                             }
-                                            else{
-
-                                                Toast.makeText(AccountSettingsActivity.this, "Error in uploading thumbnail", Toast.LENGTH_LONG).show();
-                                                mProgress.dismiss();
-                                            }
-
-                                                }});
-                                        }
-                                    });
+                                        });
 
 
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(AccountSettingsActivity.this, "Error in uploading", Toast.LENGTH_LONG).show();
+                                mProgress.dismiss();
 
-                                }
-                            });
-                        } else {
-                            Toast.makeText(AccountSettingsActivity.this, "Error in uploading", Toast.LENGTH_LONG).show();
-                            mProgress.dismiss();
-
+                            }
                         }
-                    }
-                });
+                    });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -284,5 +305,10 @@ public class AccountSettingsActivity extends AppCompatActivity {
         }
 
     }
+
+
+
+
+
 
 }
