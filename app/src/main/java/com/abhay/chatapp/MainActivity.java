@@ -15,11 +15,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -90,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             sendToStart();
         }
         else {
-            mUserDatabase.child("online").setValue(true);
+            mUserDatabase.child("online").setValue("true");
         }
 
 
@@ -100,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        mUserDatabase.child("online").setValue(false);
+        mUserDatabase.child("online").setValue(ServerValue.TIMESTAMP);
 
     }
 

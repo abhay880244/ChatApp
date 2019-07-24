@@ -17,11 +17,14 @@ import android.widget.TextView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.SnapshotParser;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -122,7 +125,7 @@ public class AllUsersActivity extends AppCompatActivity {
         adapter.startListening();
 
 
-            mUsersDatabase.child("online").setValue(true);
+            mUsersDatabase.child("online").setValue("true");
 
         Log.i("onStart", "onStart ");
 
@@ -132,7 +135,7 @@ public class AllUsersActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
-        mUsersDatabase.child("online").setValue(false);
+        mUsersDatabase.child("online").setValue(ServerValue.TIMESTAMP);
     }
 
     public static class UsersViewHolder extends RecyclerView.ViewHolder{

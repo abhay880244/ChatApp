@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1025138604191-hm054teskl2stuvh0m7up6e95b2vj3m6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.abhay.chatapp",
+            "certificate_hash": "876b3500e98dcce8bd22c48e5c85075b3984075e"
+          }
+        },
+        {
           "client_id": "1025138604191-51iufgh5e11mchjsdfhkjd6mggq7n0l4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

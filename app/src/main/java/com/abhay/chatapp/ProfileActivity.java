@@ -20,6 +20,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
@@ -227,6 +228,7 @@ public class ProfileActivity extends AppCompatActivity {
                 //--------------------NOT FRIENDS STATE-------------------------
                 if(mCurrentState==0){//0=not friends i.e. if not friends then we have to send friend request
 
+                    //for getting pushId(unique code)
                     DatabaseReference newNotificattionRef=mRootRef.child("Notifications").child(user_id).push();
                     String newNotificationId=newNotificattionRef.getKey();
 
@@ -360,7 +362,7 @@ public class ProfileActivity extends AppCompatActivity {
         super.onStart();
 
 
-            mUsersDatabase.child("online").setValue(true);
+            mUsersDatabase.child("online").setValue("true");
 
 
     }
@@ -368,6 +370,6 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        mUsersDatabase.child("online").setValue(false);
+        mUsersDatabase.child("online").setValue(ServerValue.TIMESTAMP);
     }
 }

@@ -1,6 +1,8 @@
 package com.abhay.chatapp;
 
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -107,19 +109,46 @@ public class FriendsFragment extends Fragment {
 
 
                 //getting list_user_id(profiles we are seeing on recyclerView) by position in friends_list recyclerciew
-                String list_user_id=getRef(position).getKey();
+                final String list_user_id=getRef(position).getKey();
                 if(list_user_id!=null) {
                     mUsersDatabase.child(list_user_id).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            String userName = dataSnapshot.child("name").getValue().toString();
+                            final String userName = dataSnapshot.child("name").getValue().toString();
                             String userThumbImage = dataSnapshot.child("thumb_img").getValue().toString();
                             if(dataSnapshot.hasChild("online")){
-                                Boolean online= (boolean) dataSnapshot.child("online").getValue();
+                                String online= dataSnapshot.child("online").getValue().toString();
                                 holder.setOnline(online);
                             }
                             holder.setUserName(userName);
                             holder.setThumbImage(userThumbImage);
+                            holder.mView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    //pop-up or alert dialog
+                                    CharSequence[] options=new CharSequence[]{"Open Profile","Send Message"};
+                                    AlertDialog.Builder builder=new AlertDialog.Builder(getContext());
+                                    builder.setTitle("Select Options");
+                                    builder.setItems(options, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                            if(which==0) {
+                                                Intent profileIntent = new Intent(getContext(), ProfileActivity.class);
+                                                profileIntent.putExtra("user_id", list_user_id);
+                                                startActivity(profileIntent);
+                                            }
+                                            if(which==1){
+                                                Intent chatIntent = new Intent(getContext(), ChatActivty.class);
+                                                chatIntent.putExtra("user_id", list_user_id);
+                                                chatIntent.putExtra("user_name", userName);
+                                                startActivity(chatIntent);
+                                            }
+                                        }
+                                    });
+                                    builder.show();
+                                }
+                            });
 
                         }
 
@@ -169,9 +198,9 @@ public class FriendsFragment extends Fragment {
         }
 
 
-        public void setOnline(Boolean online) {
+        public void setOnline(String online) {
             CircleImageView onlineIcon=mView.findViewById(R.id.user_single_online_icon);
-            if(online ==true){
+            if(online.equals("true")){
                 onlineIcon.setVisibility(View.VISIBLE);
 
             }
