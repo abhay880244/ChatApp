@@ -44,7 +44,7 @@
             android:layout_weight="1"
             android:background="@android:color/white"
             android:scaleType="centerInside"
-            android:src="@drawable/addcircleicon" />
+            android:src="@drawable/ic_add_black_24dp" />
 
         <EditText
             android:id="@+id/chat_message_view"
@@ -62,7 +62,7 @@
             android:layout_weight="1"
             android:background="@android:color/white"
             android:scaleType="centerInside"
-            android:src="@drawable/sendicon" />
+            android:src="@drawable/ic_send_black_24dp" />
 
     </LinearLayout>
 </RelativeLayout>

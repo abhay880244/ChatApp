@@ -1,7 +1,7 @@
 package com.abhay.chatapp;
 
 public class Messages {
-    private String message, type,from;
+    private String message, type,from,pushid,receiverid;
     private long time;
     private boolean seen;
 
@@ -9,12 +9,14 @@ public class Messages {
 
     }
 
-    public Messages(String message, String type, String from, long time, boolean seen) {
+    public Messages(String message, String type, String from, long time, boolean seen,String pushid,String receiverid) {
         this.message = message;
         this.type = type;
         this.from = from;
         this.time = time;
         this.seen = seen;
+        this.pushid=pushid;
+        this.receiverid=receiverid;
     }
 
 
@@ -56,5 +58,21 @@ public class Messages {
 
     public void setFrom(String from) {
         this.from = from;
+    }
+
+    public String getPushid() {
+        return pushid;
+    }
+
+    public void setPushid(String pushid) {
+        this.pushid = pushid;
+    }
+
+    public String getReceiverid() {
+        return receiverid;
+    }
+
+    public void setReceiverid(String receiverid) {
+        this.receiverid = receiverid;
     }
 }

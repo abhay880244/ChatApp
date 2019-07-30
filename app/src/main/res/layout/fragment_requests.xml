@@ -6,10 +6,9 @@
     tools:context=".RequestsFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/requests_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="requests"
-        android:textColor="@android:color/background_dark" />
-
+        ></android.support.v7.widget.RecyclerView>
 </RelativeLayout>
